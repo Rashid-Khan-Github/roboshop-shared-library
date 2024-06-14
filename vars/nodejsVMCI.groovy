@@ -74,9 +74,9 @@ def call(Map configMap){
                     nexusArtifactUploader(
                         nexusVersion: 'nexus3',
                         protocol: 'http',
-                        nexusUrl: '34.229.101.93:8081/',
+                        nexusUrl: '172.31.37.24:8081/',
                         groupId: 'com.roboshop',
-                        version: "$packageVersion",
+                        version: "${packageVersion}",
                         repository: "${component}",
                         credentialsId: 'nexus-auth',
                         artifacts: [
@@ -90,12 +90,15 @@ def call(Map configMap){
             }
             // here i need to configure downstream job. I have to pass package version for deployment
             // This job will wait until downstream job is over
+            // By default, when a non master branch CI is done, we can go for DEV deployment
+
             stage('Deployment') {
                 steps{
                     script{
                         echo 'Deploying to Server'
                         def params = [
                             string(name: 'version', value: "${packageVersion}")
+                            string(name: 'environment', value: 'dev')
                         ]
                         build job: "../${component}-deploy", wait: true, parameters: params
                     }
