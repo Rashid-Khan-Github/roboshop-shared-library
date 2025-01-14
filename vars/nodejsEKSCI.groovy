@@ -109,23 +109,36 @@ def call(Map configMap){
                     }
                 }
             }
+
+            stage('EKS Deploy') {
+
+                steps{
+                    script{
+                        sh """
+                            cd helm
+                            sed -i 's/IMAGE_VERSION/$packageVersion/g' values.yaml
+                            helm upgrade ${component} .
+                        """
+                    }
+                }
+            }
             // here i need to configure downstream job. I have to pass package version for deployment
             // This job will wait until downstream job is over
             // By default, when a non master branch CI is done, we can go for DEV deployment
 
-            stage('Deployment') {
-                steps{
-                    script{
-                        echo 'Deploying to Server'
-                        def params = [
-                            string(name: 'version', value: "${packageVersion}"),
-                            string(name: 'environment', value: 'dev')
-                        ]
-                        build job: "../${component}-deploy", wait: true, parameters: params
-                    }
-                }
-            }
-        }
+        //     stage('Deployment') {
+        //         steps{
+        //             script{
+        //                 echo 'Deploying to Server'
+        //                 def params = [
+        //                     string(name: 'version', value: "${packageVersion}"),
+        //                     string(name: 'environment', value: 'dev')
+        //                 ]
+        //                 build job: "../${component}-deploy", wait: true, parameters: params
+        //             }
+        //         }
+        //     }
+        // }
 
         post{
             always{
